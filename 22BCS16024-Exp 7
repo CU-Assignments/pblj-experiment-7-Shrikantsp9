@@ -1,0 +1,310 @@
+import java.sql.*;
+
+public class DBConnection {
+    private static final String URL = "jdbc:mysql://localhost:3306/your_database"; // Update with your database details
+    private static final String USER = "your_username";  // Your MySQL username
+    private static final String PASSWORD = "your_password"; // Your MySQL password
+
+    public static Connection connect() throws SQLException {
+        return DriverManager.getConnection(URL, USER, PASSWORD);
+    }
+}
+public class Product {
+    private int productId;
+    private String productName;
+    private double price;
+    private int quantity;
+
+    // Getters and Setters
+    public int getProductId() {
+        return productId;
+    }
+
+    public void setProductId(int productId) {
+        this.productId = productId;
+    }
+
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+}
+import java.sql.*;
+
+public class ProductCRUD {
+    private Connection conn;
+
+    public ProductCRUD() throws SQLException {
+        conn = DBConnection.connect();
+    }
+
+    // CREATE
+    public void addProduct(String productName, double price, int quantity) throws SQLException {
+        String query = "INSERT INTO Product (ProductName, Price, Quantity) VALUES (?, ?, ?)";
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, productName);
+            stmt.setDouble(2, price);
+            stmt.setInt(3, quantity);
+            stmt.executeUpdate();
+        }
+    }
+
+    // READ
+    public void getAllProducts() throws SQLException {
+        String query = "SELECT * FROM Product";
+        try (Statement stmt = conn.createStatement()) {
+            ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                System.out.println("ProductID: " + rs.getInt("ProductID"));
+                System.out.println("ProductName: " + rs.getString("ProductName"));
+                System.out.println("Price: " + rs.getDouble("Price"));
+                System.out.println("Quantity: " + rs.getInt("Quantity"));
+                System.out.println("----------------------");
+            }
+        }
+    }
+
+    // UPDATE
+    public void updateProduct(int productId, String productName, double price, int quantity) throws SQLException {
+        String query = "UPDATE Product SET ProductName = ?, Price = ?, Quantity = ? WHERE ProductID = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, productName);
+            stmt.setDouble(2, price);
+            stmt.setInt(3, quantity);
+            stmt.setInt(4, productId);
+            stmt.executeUpdate();
+        }
+    }
+
+    // DELETE
+    public void deleteProduct(int productId) throws SQLException {
+        String query = "DELETE FROM Product WHERE ProductID = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, productId);
+            stmt.executeUpdate();
+        }
+    }
+}
+import java.util.Scanner;
+import java.sql.*;
+
+public class ProductMenu {
+    public static void main(String[] args) throws SQLException {
+        Scanner scanner = new Scanner(System.in);
+        ProductCRUD productCRUD = new ProductCRUD();
+
+        while (true) {
+            System.out.println("1. Add Product");
+            System.out.println("2. View Products");
+            System.out.println("3. Update Product");
+            System.out.println("4. Delete Product");
+            System.out.println("5. Exit");
+
+            int choice = scanner.nextInt();
+
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter Product Name: ");
+                    String name = scanner.next();
+                    System.out.print("Enter Product Price: ");
+                    double price = scanner.nextDouble();
+                    System.out.print("Enter Product Quantity: ");
+                    int quantity = scanner.nextInt();
+                    productCRUD.addProduct(name, price, quantity);
+                    break;
+                case 2:
+                    productCRUD.getAllProducts();
+                    break;
+                case 3:
+                    System.out.print("Enter Product ID to Update: ");
+                    int idToUpdate = scanner.nextInt();
+                    System.out.print("Enter New Product Name: ");
+                    String newName = scanner.next();
+                    System.out.print("Enter New Price: ");
+                    double newPrice = scanner.nextDouble();
+                    System.out.print("Enter New Quantity: ");
+                    int newQuantity = scanner.nextInt();
+                    productCRUD.updateProduct(idToUpdate, newName, newPrice, newQuantity);
+                    break;
+                case 4:
+                    System.out.print("Enter Product ID to Delete: ");
+                    int idToDelete = scanner.nextInt();
+                    productCRUD.deleteProduct(idToDelete);
+                    break;
+                case 5:
+                    System.out.println("Exiting...");
+                    return;
+                default:
+                    System.out.println("Invalid Choice.");
+            }
+        }
+    }
+}
+
+
+//2.Student management System
+
+public class Student {
+    private int studentId;
+    private String name;
+    private String department;
+    private double marks;
+
+    // Getters and Setters
+    public int getStudentId() {
+        return studentId;
+    }
+
+    public void setStudentId(int studentId) {
+        this.studentId = studentId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(String department) {
+        this.department = department;
+    }
+
+    public double getMarks() {
+        return marks;
+    }
+
+    public void setMarks(double marks) {
+        this.marks = marks;
+    }
+}
+import java.sql.*;
+
+public class StudentController {
+    private Connection conn;
+
+    public StudentController() throws SQLException {
+        conn = DBConnection.connect();
+    }
+
+    // CREATE
+    public void addStudent(Student student) throws SQLException {
+        String query = "INSERT INTO Student (Name, Department, Marks) VALUES (?, ?, ?)";
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, student.getName());
+            stmt.setString(2, student.getDepartment());
+            stmt.setDouble(3, student.getMarks());
+            stmt.executeUpdate();
+        }
+    }
+
+    // READ
+    public Student getStudent(int studentId) throws SQLException {
+        String query = "SELECT * FROM Student WHERE StudentID = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, studentId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                Student student = new Student();
+                student.setStudentId(rs.getInt("StudentID"));
+                student.setName(rs.getString("Name"));
+                student.setDepartment(rs.getString("Department"));
+                student.setMarks(rs.getDouble("Marks"));
+                return student;
+            }
+        }
+        return null;
+    }
+}
+import java.util.Scanner;
+import java.sql.*;
+
+public class StudentMenu {
+    public static void main(String[] args) throws SQLException {
+        Scanner scanner = new Scanner(System.in);
+        StudentController studentController = new StudentController();
+
+        while (true) {
+            System.out.println("1. Add Student");
+            System.out.println("2. View Student");
+            System.out.println("3. Exit");
+
+            int choice = scanner.nextInt();
+
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter Name: ");
+                    String name = scanner.next();
+                    System.out.print("Enter Department: ");
+                    String department = scanner.next();
+                    System.out.print("Enter Marks: ");
+                    double marks = scanner.nextDouble();
+                    Student student = new Student();
+                    student.setName(name);
+                    student.setDepartment(department);
+                    student.setMarks(marks);
+                    studentController.addStudent(student);
+                    break;
+                case 2:
+                    System.out.print("Enter Student ID: ");
+                    int id = scanner.nextInt();
+                    Student studentFromDB = studentController.getStudent(id);
+                    if (studentFromDB != null) {
+                        System.out.println("Student ID: " + studentFromDB.getStudentId());
+                        System.out.println("Name: " + studentFromDB.getName());
+                        System.out.println("Department: " + studentFromDB.getDepartment());
+                        System.out.println("Marks: " + studentFromDB.getMarks());
+                    } else {
+                        System.out.println("Student not found.");
+                    }
+                    break;
+                case 3:
+                    System.out.println("Exiting...");
+                    return;
+                default:
+                    System.out.println("Invalid Choice.");
+            }
+        }
+    }
+}
+-- Create Product table
+CREATE TABLE Product (
+    ProductID INT AUTO_INCREMENT PRIMARY KEY,
+    ProductName VARCHAR(100),
+    Price DECIMAL(10, 2),
+    Quantity INT
+);
+
+-- Create Student table
+CREATE TABLE Student (
+    StudentID INT AUTO_INCREMENT PRIMARY KEY,
+    Name VARCHAR(100),
+    Department VARCHAR(50),
+    Marks DECIMAL(5, 2)
+);
+
+
